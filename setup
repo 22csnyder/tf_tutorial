@@ -1,0 +1,68 @@
+mkvirtualenv tensorflow-1.0.0
+
+pip install -r requirements.txt
+
+pip install --upgrade tensorflow
+
+
+--that's it. Some advice on other related topics below
+
+
+
+
+------
+1-16-17 Some notes on setup etc
+
+
+Using a VPN to connect from off campus:
+	vpn to utexas:
+	sudo openconnect https://vpn.utexas.edu
+	--> requires duo app for two factor authentication
+	ssh <username>@<servername>
+
+
+install virtualenvwrapper:
+	http://virtualenvwrapper.readthedocs.io/en/latest/install.html
+setup virtualenvwrapper:
+	add this to .bashrc:
+		export WORKON_HOME=$HOME/.virtualenvs
+		export PROJECT_HOME=$HOME/Devel
+		source /usr/local/bin/virtualenvwrapper.sh
+		(run "source ~/.bashrc" afterward)
+	make the virutalenv:
+		mkvirtualenv tensorflow-1.0.0
+	have that virtualenv activate on login (optional)
+		add this to bottom of ~/.bashrc
+			workon tensorflow-1.0.0
+
+
+
+Run this command to see that
+"which pip"
+>>  /home/chris/.virtualenvs/tensorflow-1.0.0/bin/pip
+
+completing setup...
+	pip freeze > requirements.txt
+		remove matplotlib, tensorflow, scipy that break pip install
+
+	#Get the basic packages required
+	pip install -r requirements.txt
+
+	pip install --upgrade tensorflow
+
+
+Some advice if you want to use python packages that can't be installed with pip, like scipy, opencv...
+.. install them globally or with a package manager then make symlinks..
+
+
+	Something like this..here i've used miniconda to compile scipy for me
+	once in $VIRTUAL_ENV/lib/python2.7/site-packages/ ...
+	ln -s /home/chris/Software/miniconda2/envs/tensorflow/lib/python2.7/site-packages/scipy
+	ln -s /home/chris/Software/miniconda2/envs/tensorflow/lib/python2.7/site-packages/scipy-0.17.0-py2.7.egg-info
+
+
+	This is what it should look like once it's done:
+	ls -l ~/.virtualenvs/tensorflow-0.10/lib/python2.7/site-packages/ | grep scipy
+	lrwxrwxrwx  1 chris pheno     81 Sep  5 14:31 scipy -> /home/chris/Software/miniconda2/envs/tensorflow/lib/python2.7/site-packages/scipy
+	lrwxrwxrwx  1 chris pheno    103 Sep  5 14:31 scipy-0.17.0-py2.7.egg-info -> /home/chris/Software/miniconda2/envs/tensorflow/lib/python2.7/site-packages/scipy-0.17.0-py2.7.egg-info
+
