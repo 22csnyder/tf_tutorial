@@ -131,37 +131,37 @@ class Basic_Graph(object):
         #prefix=''
         col=[self.summaries]
         #    prefix+='train'
-        if self.is_training:#NOTE - do we need this part
-            if hasattr(self, 'loss'):
-                tf.summary.scalar('batch_loss', self.loss,col)
-                stream_loss,update_loss= tf.contrib.metrics.streaming_mean(
-                    self.loss,
-                    metrics_collections=self.metrics,
-                    updates_collections=self.update_ops)
-                tf.summary.scalar(self.prefix+'_'+'loss',stream_loss,col)
+        #if self.is_training:#NOTE - do we need this part
+        if hasattr(self, 'loss'):
+            tf.summary.scalar('batch_loss', self.loss,col)
+            stream_loss,update_loss= tf.contrib.metrics.streaming_mean(
+                self.loss,
+                metrics_collections=self.metrics,
+                updates_collections=self.update_ops)
+            tf.summary.scalar(self.prefix+'_'+'loss',stream_loss,col)
 
-            if hasattr(self, 'accuracy'):
-                tf.summary.scalar('batch_accuracy', self.accuracy,col)
-                stream_acc,update_acc= tf.contrib.metrics.streaming_accuracy(
-                    predictions=self.y_hat,labels=self.y)
-                tf.add_to_collection(self.update_ops,update_acc)
-                tf.add_to_collection(self.metrics,stream_acc)
-                tf.summary.scalar(self.prefix+'_'+'acc',stream_acc,col)
+        if hasattr(self, 'accuracy'):
+            tf.summary.scalar('batch_accuracy', self.accuracy,col)
+            stream_acc,update_acc= tf.contrib.metrics.streaming_accuracy(
+                predictions=self.y_hat,labels=self.y)
+            tf.add_to_collection(self.update_ops,update_acc)
+            tf.add_to_collection(self.metrics,stream_acc)
+            tf.summary.scalar(self.prefix+'_'+'acc',stream_acc,col)
 
-            if hasattr(self, 'logits'):
-                tf.summary.histogram('batch_logits', self.logits,col)
+        if hasattr(self, 'logits'):
+            tf.summary.histogram('batch_logits', self.logits,col)
 
-            if hasattr(self,'class_probs'):
-                tf.summary.histogram('class_probs', self.class_probs,col)
+        if hasattr(self,'class_probs'):
+            tf.summary.histogram('class_probs', self.class_probs,col)
 
-            if hasattr(self,'y_hat') and self.n_classes == 2:
-                self.bool_y=tf.cast(self.y, tf.float32)
-                self.bool_y_hat=tf.cast(self.y_hat, tf.float32)
-                stream_auc,update_auc= tf.contrib.metrics.streaming_auc(
-                    predictions=self.bool_y_hat,labels=self.bool_y,
-                    metrics_collections=self.metrics,
-                    updates_collections=self.update_ops)
-                tf.summary.scalar(self.prefix+'_'+'auc',stream_auc,col)
+        if hasattr(self,'y_hat') and self.n_classes == 2:
+            self.bool_y=tf.cast(self.y, tf.float32)
+            self.bool_y_hat=tf.cast(self.y_hat, tf.float32)
+            stream_auc,update_auc= tf.contrib.metrics.streaming_auc(
+                predictions=self.bool_y_hat,labels=self.bool_y,
+                metrics_collections=self.metrics,
+                updates_collections=self.update_ops)
+            tf.summary.scalar(self.prefix+'_'+'auc',stream_auc,col)
 
         #print 'this occurs:,'col[0]
 
@@ -234,8 +234,7 @@ class Basic_Model(object):
         #save_path = self.saver.save(self.session, f, global_step=self.step)
         print("Model saved in file: %s" % save_path)
 
-    def __init__(self, graph, graph_kwargs, session=None, scope='Basic_Model',
-                 train_inputs=None, test_inputs=None, n_train_examples=None):
+    def __init__(self, graph, graph_kwargs, session=None, scope='Basic_Model', train_inputs=None, test_inputs=None, n_train_examples=None):
 
         self.n_train_examples=n_train_examples
 
@@ -448,7 +447,7 @@ class Basic_Model(object):
 
     #n_epochs must be specified not n_iter for the moment
     #def fit(self,inputs=None,n_epochs=1,n_iter=None,batch_size=None,
-    def fit(self,inputs=None,n_epochs=1,batch_size=None,
+    def fit(self,inputs=None,n_epochs=None,batch_size=None,
             epoch_per_summary=1, epoch_per_checkpoint=5):
             #epoch_per_summary=5, epoch_per_checkpoint=25):
         #batch_size is not to be given if inputs is not given.
@@ -466,6 +465,10 @@ class Basic_Model(object):
         #nag: n_iter is actually rounds short if batch_size doesn't line up
         if inputs is None:
             n_iter=self.train_stream.records_per_epoch/self.train_stream.batch_size#iter per epoch
+        else:
+            #n_iter=len(inputs['x'])
+            n_iter=None
+
         for epoch in range(n_epochs):
             self.reset_streaming_metrics()
             if inputs is not None:#shuffle
